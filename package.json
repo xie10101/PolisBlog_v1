@@ -1,0 +1,25 @@
+{
+  "name": "polisblog",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.6.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm run build:packages && pnpm run build:apps",
+    "build:packages": "pnpm --filter @polisblog/shared run build && pnpm --filter @polisblog/agent run build",
+    "build:apps": "pnpm --filter @polisblog/web run build && pnpm --filter @polisblog/api run build",
+    "dev": "pnpm -r --parallel run dev",
+    "dev:web": "pnpm --filter @polisblog/web run dev",
+    "dev:api": "pnpm --filter @polisblog/api run dev",
+    "typecheck": "pnpm -r run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "pnpm -r exec rimraf dist .next"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "rimraf": "^5.0.0"
+  }
+}
