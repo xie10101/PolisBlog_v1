@@ -1,16 +1,18 @@
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { PassportStrategy } from "@nestjs/passport";
-import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { users } from "../../../db/schema/user.schema";
 import { eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "../../../db/schema";
-import { UnauthorizedException } from "@nestjs/common";
+import { Injectable, Inject, UnauthorizedException } from "@nestjs/common";
+import { DRIZZLE_DB } from "../../../db/drizzle.provider";
+
+@Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
   constructor(
     private configService: ConfigService,
-    private readonly db: NodePgDatabase<typeof schema>,
+    @Inject(DRIZZLE_DB) private readonly db: NodePgDatabase<typeof schema>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

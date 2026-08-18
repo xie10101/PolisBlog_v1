@@ -3,7 +3,8 @@ import { ConfigModule } from "@nestjs/config";
 import { DbModule } from "./db/db.module";
 import { ZodValidationPipe } from "nestjs-zod";
 import { APP_PIPE } from "@nestjs/core";
-
+import { JwtAuthGuard } from "./modules/auth/guards/jwt.auth.guard";
+import { AuthModule } from "./modules/auth/auth.module";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -13,8 +14,10 @@ import { APP_PIPE } from "@nestjs/core";
       ignoreEnvVars: false, // true 忽略系统环境变量，只读取文件
     }),
     DbModule,
+    AuthModule,
   ],
   providers: [
+    JwtAuthGuard,
     {
       provide: APP_PIPE,
       useClass: ZodValidationPipe, // 全局开启zod校验管道

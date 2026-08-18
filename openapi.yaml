@@ -1,0 +1,634 @@
+openapi: 3.0.3
+info:
+  title: PolisBlog API(V1.1)
+  description: 个人博客+知识中枢后端接口，适配Nest+Drizzle+PGSQL，可直接导入Apifox；仅实现V1.1需求
+  version: 1.1.0
+servers:
+  - url: http://127.0.0.1:3000/api
+    description: 本地开发环境
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    # 通用返回包装
+    ApiResponse<T>:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          description: 业务数据，成功时返回
+        error:
+          type: string
+          description: 错误信息，失败返回
+        errors:
+          type: array
+          items:
+            type: object
+          description: 表单校验错误数组
+    # 分页包装
+    PageResult<T>:
+      type: object
+      properties:
+        items:
+          type: array
+          items: {}
+        total:
+          type: integer
+          example: 42
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 5
+    # 用户
+    UserVO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+        avatar:
+          type: string
+        bio:
+          type: string
+        role:
+          type: string
+          enum: [admin]
+        status:
+          type: string
+        lastLoginAt:
+          type: string
+          format: date‑time
+        createdAt:
+          type: string
+          format: date‑time
+        updatedAt:
+          type: string
+          format: date‑time
+    # 文章Post
+    PostVO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        htmlContent:
+          type: string
+        coverImage:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, scheduled]
+        viewCount:
+          type: integer
+        wordCount:
+          type: integer
+        readTime:
+          type: integer
+        isTop:
+          type: boolean
+        sortOrder:
+          type: integer
+        publishedAt:
+          type: string
+          format: date‑time
+        authorId:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date‑time
+        updatedAt:
+          type: string
+          format: date‑time
+        deletedAt:
+          type: string
+          format: date‑time
+          nullable: true
+    CreatePostDto:
+      type: object
+      required:
+        - title
+        - slug
+        - content
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+        excerpt:
+          type: string
+          maxLength: 500
+        content:
+          type: string
+        htmlContent:
+          type: string
+        coverImage:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, scheduled]
+        isTop:
+          type: boolean
+          default: false
+        sortOrder:
+          type: integer
+          default: 0
+        publishedAt:
+          type: string
+          format: date‑time
+        categoryId:
+          type: string
+          format: uuid
+    UpdatePostDto:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+        excerpt:
+          type: string
+          maxLength: 500
+        content:
+          type: string
+        htmlContent:
+          type: string
+        coverImage:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, scheduled]
+        isTop:
+          type: boolean
+        sortOrder:
+          type: integer
+        publishedAt:
+          type: string
+          format: date‑time
+        categoryId:
+          type: string
+          format: uuid
+    # 分类Category
+    CategoryVO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date‑time
+        updatedAt:
+          type: string
+          format: date‑time
+        deletedAt:
+          type: string
+          format: date‑time
+          nullable: true
+    CreateCategoryDto:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        status:
+          type: string
+          enum: [active, inactive]
+        sortOrder:
+          type: integer
+          default: 0
+    UpdateCategoryDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        status:
+          type: string
+          enum: [active, inactive]
+        sortOrder:
+          type: integer
+    # 站点配置BlogInfo
+    BlogInfoVO:
+      type: object
+      properties:
+        siteName:
+          type: string
+        siteDesc:
+          type: string
+        authorName:
+          type: string
+        authorIntro:
+          type: string
+        github:
+          type: string
+        gitee:
+          type: string
+        wechat:
+          type: string
+        qq:
+          type: string
+        backgroundImg:
+          type: string
+        updateTime:
+          type: string
+          format: date‑time
+    UpdateBlogInfoDto:
+      type: object
+      properties:
+        siteName:
+          type: string
+        siteDesc:
+          type: string
+        authorName:
+          type: string
+        authorIntro:
+          type: string
+        github:
+          type: string
+        gitee:
+          type: string
+        wechat:
+          type: string
+        qq:
+          type: string
+        backgroundImg:
+          type: string
+    # 登录
+    LoginDto:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    LoginVO:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserVO"
+    # 搜索
+    SearchPostDto:
+      type: object
+      properties:
+        keyword:
+          type: string
+        page:
+          type: integer
+          default: 1
+        pageSize:
+          type: integer
+          default: 10
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: 页码，从1开始
+      schema:
+        type: integer
+        default: 1
+    PageSizeParam:
+      name: pageSize
+      in: query
+      description: 每页条数
+      schema:
+        type: integer
+        default: 10
+    UuidPathParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SlugPathParam:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ========== 鉴权登录 ==========
+  /auth/login:
+    post:
+      security: []
+      summary: 站长登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginDto"
+      responses:
+        "200":
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse<T>"
+                examples:
+                  success:
+                    value:
+                      success: true
+                      data:
+                        token: "jwt‑token‑string"
+                        user: {}
+
+  # ========== 站点信息 前台可访问 ==========
+  /blog/info:
+    get:
+      security: []
+      summary: 获取站点&作者信息(前台公开)
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse<T>"
+    put:
+      summary: 更新站点信息【后台需要鉴权】
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBlogInfoDto"
+      responses:
+        "200":
+          description: 更新成功
+
+  # ========== 文章 前台接口（访客） ==========
+  /posts:
+    get:
+      security: []
+      summary: 前台‑获取已发布文章列表，分页
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: sort
+          in: query
+          description: sort=-publishedAt 按发布时间倒序
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 分页文章列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse<T>"
+  /posts/{slug}:
+    get:
+      security: []
+      summary: 前台‑通过slug获取文章详情
+      parameters:
+        - $ref: "#/components/parameters/SlugPathParam"
+      responses:
+        "200":
+          description: 文章详情
+        "404":
+          description: 文章不存在/未发布
+  /posts/search:
+    get:
+      security: []
+      summary: 前台‑文章标题搜索
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+      responses:
+        "200":
+          description: 搜索结果分页
+
+  # ========== 文章 后台管理接口（需要登录鉴权） ==========
+  /dashboard/posts:
+    get:
+      summary: 后台‑全部文章列表(含草稿、回收站)
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - name: status
+          in: query
+          description: draft / published / scheduled / deleted
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 后台文章分页列表
+    post:
+      summary: 后台‑新建文章
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostDto"
+      responses:
+        "201":
+          description: 创建成功，返回post
+  /dashboard/posts/{id}:
+    get:
+      summary: 后台‑获取单篇文章(编辑回显)
+      parameters:
+        - $ref: "#/components/parameters/UuidPathParam"
+      responses:
+        "200":
+          description: 返回完整文章
+    put:
+      summary: 后台‑更新文章
+      parameters:
+        - $ref: "#/components/parameters/UuidPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePostDto"
+      responses:
+        "200":
+          description: 更新成功
+    delete:
+      summary: 后台‑软删除文章(移入回收站)
+      parameters:
+        - $ref: "#/components/parameters/UuidPathParam"
+      responses:
+        "200":
+          description: 软删除成功
+  /dashboard/posts/{id}/restore:
+    post:
+      summary: 后台‑恢复回收站文章
+      parameters:
+        - $ref: "#/components/parameters/UuidPathParam"
+      responses:
+        "200":
+          description: 恢复成功
+  /dashboard/posts/{id}/destroy:
+    delete:
+      summary: 后台‑彻底删除文章
+      parameters:
+        - $ref: "#/components/parameters/UuidPathParam"
+      responses:
+        "200":
+          description: 彻底删除
+
+  # ========== 分类 前台 ==========
+  /categories:
+    get:
+      security: []
+      summary: 前台‑获取有效分类列表
+      responses:
+        "200":
+          description: 分类数组
+  /categories/{slug}:
+    get:
+      security: []
+      summary: 前台‑按slug获取分类详情
+      parameters:
+        - $ref: "#/components/parameters/SlugPathParam"
+      responses:
+        "200":
+          description: 分类详情
+
+  # ========== 分类 后台管理 ==========
+  /dashboard/categories:
+    get:
+      summary: 后台‑全部分类列表（含已删除）
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+      responses:
+        "200":
+          description: 分页分类
+    post:
+      summary: 后台‑新建分类
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryDto"
+      responses:
+        "201":
+          description: 创建分类
+  /dashboard/categories/{id}:
+    get:
+      summary: 后台‑获取单条分类
+      parameters:
+        - $ref: "#/components/parameters/UuidPathParam"
+    put:
+      summary: 后台‑更新分类
+      parameters:
+        - $ref: "#/components/parameters/UuidPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCategoryDto"
+    delete:
+      summary: 后台‑软删除分类
+      parameters:
+        - $ref: "#/components/parameters/UuidPathParam"
+
+  # ========== Agent Beta V1.1仅占位，V1.3完整实现 ==========
+  /agent/chat:
+    post:
+      security: []
+      summary: Agent问答接口(Beta，V1.1仅占位)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+      responses:
+        "200":
+          description: Agent回答，携带sources溯源列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse<T>"
+                examples:
+                  example:
+                    value:
+                      success: true
+                      data:
+                        answer: "回答文本..."
+                        sources: [{ "title": "xxx", "url": "/post/xxx" }]

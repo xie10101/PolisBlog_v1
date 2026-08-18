@@ -1,10 +1,11 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-
+import { JwtAuthGuard } from "./modules/auth/guards/jwt.auth.guard";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix("api");
-
+  // app.setGlobalPrefix("api");
+  // 注册全局守卫
+  app.useGlobalGuards(app.get(JwtAuthGuard));
   /**
  * 全局管道另一种注册方式：
  * 
