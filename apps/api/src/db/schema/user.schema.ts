@@ -1,11 +1,4 @@
-import {
-  pgTable,
-  uuid,
-  varchar,
-  text,
-  timestamp,
-  index,
-} from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, index } from "drizzle-orm/pg-core";
 
 export const users = pgTable(
   "users",
@@ -23,6 +16,9 @@ export const users = pgTable(
     // 角色与状态
     role: varchar("role", { length: 20 }).default("admin"),
     status: varchar("status", { length: 20 }).default("active"),
+
+    // jwt相关
+    refreshToken: varchar("refresh_token", { length: 1000 }), // 存储refreshToken
 
     // 时间戳
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
