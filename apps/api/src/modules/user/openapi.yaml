@@ -1,0 +1,165 @@
+openapi: 3.0.3
+info:
+  title: Admin 用户模块接口
+  version: 1.0.0
+  description: NestJS + Drizzle 用户管理模块（admin 路由组）
+servers:
+  - url: http://127.0.0.1:3000
+paths:
+
+  /admin:
+    get:
+      summary: 用户分页列表查询
+      tags:
+        - Admin用户管理
+      parameters:
+        - name: page
+          in: query
+          description: 页码，默认1
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: 每页条数，1‑100，默认10
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: username
+          in: query
+          description: 用户名模糊检索（可选）
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: 邮箱模糊检索（可选）
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 分页结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPageResp'
+
+components:
+  schemas:
+    CreateUserDto:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: 用户名
+          example: "zhangsan"
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+          description: 明文密码，后端bcrypt加密存储
+          example: "123456"
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: 邮箱（可选）
+          example: "zhangsan@example.com"
+        avatar:
+          type: string
+          description: 头像地址（可选）
+          example: ""
+        bio:
+          type: string
+          description: 个人简介（可选）
+          example: ""
+
+    UpdateUserDto:
+      type: object
+      description: 更新用户，全部字段可选；password传则修改密码
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: "zhangsan_update"
+        password:
+          type: string
+          minLength: 6
+          maxLength: 100
+          description: 明文密码，不传则不修改密码
+          example: ""
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          example: "update@example.com"
+        avatar:
+          type: string
+          example: ""
+        bio:
+          type: string
+          example: ""
+        role:
+          type: integer
+          description: 用户角色枚举值
+          example: 0
+        status:
+          type: string
+          description: 用户状态，如 inactive
+          example: "inactive"
+
+    SafeUser:
+      type: object
+      description: 用户返回模型，已剔除 passwordHash / refreshToken
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+        avatar:
+          type: string
+        bio:
+          type: string
+        role:
+          type: integer
+        status:
+          type: string
+        lastLoginAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserPageResp:
+      type: object
+      description: 用户分页返回体
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/SafeUser'
+        total:
+          type: integer
+          description: 总条数
+          example: 0
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 10

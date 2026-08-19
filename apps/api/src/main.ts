@@ -1,9 +1,17 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { JwtAuthGuard } from "./modules/auth/guards/jwt.auth.guard";
+import { AllExceptionFilter } from "./common/filter/http-exception.filter";
+import { WINSTON_MODULE_PROVIDER } from "nest-winston";
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // app.setGlobalPrefix("api");
+
+  // 全局过滤器：
+  // 全局注册异常过滤器
+  app.useGlobalFilters(new AllExceptionFilter(app.get(WINSTON_MODULE_PROVIDER)));
+
+  app.setGlobalPrefix("api");
   // 注册全局守卫
   app.useGlobalGuards(app.get(JwtAuthGuard));
   /**
@@ -22,3 +30,26 @@ async function bootstrap() {
 }
 
 void bootstrap();
+
+/**
+ *
+ *import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { AllExceptionFilter } from './common/filter/http-exception.filter';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  
+  // 全局注册异常过滤器
+  app.useGlobalFilters(new AllExceptionFilter(app.get(WINSTON_MODULE_PROVIDER)));
+  
+  // 替换Nest原生日志为Winston日志
+  const logger = app.get(WINSTON_MODULE_PROVIDER);
+  app.useLogger(logger);
+
+  await app.listen(3000);
+}
+bootstrap();
+
+ */

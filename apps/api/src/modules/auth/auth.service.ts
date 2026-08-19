@@ -22,7 +22,7 @@ export class AuthService {
   async validateUser(username: string, password: string) {
     const [user] = await this.db.select().from(users).where(eq(users.username, username));
     if (!user) return null;
-
+    //比对校验加密后hash串
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) return null;
     return user;

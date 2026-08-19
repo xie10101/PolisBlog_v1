@@ -3,8 +3,8 @@ import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
-import { IsPublic } from "./decorators/is‑public.decorator";
-
+import { IsPublic } from "./decorators/is-public.decorator";
+import { AppLoggerService } from "src/common/logger/logger.service";
 /**
  * 引入 Express 类型（auth.controller.ts:8）
 定义 AuthenticatedRequest 接口，扩展 Request 并声明 user 字段形状（auth.controller.ts:10-12）
@@ -18,7 +18,10 @@ interface AuthenticatedRequest extends Request {
 
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly logger: AppLoggerService,
+  ) {}
   @IsPublic()
   @Post("login")
   @UseGuards(AuthGuard("local"))
@@ -27,6 +30,7 @@ export class AuthController {
   async login(@Body() _dto: LoginDto, @Req() req: AuthenticatedRequest) {
     // local策略校验完成，req.user为数据库用户对象
     // @Req() 是 NestJS 用来注入原生请求对象的参数装饰器。
+    this.logger.log("进行登录" + req.user.id);
     const { id, role } = req.user;
     return this.authService.login(id, role);
   }
