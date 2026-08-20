@@ -7,6 +7,8 @@ import { JwtAuthGuard } from "./modules/auth/guards/jwt.auth.guard";
 import { AuthModule } from "./modules/auth/auth.module";
 import { UserModule } from "./modules/user/user.module";
 import { LoggerModule } from "./common/logger/logger.module";
+import { PostModule } from "./modules/post/post.module";
+import { CategoryModule } from "./modules/category/category.module";
 import { NestModule } from "@nestjs/common";
 import { MiddlewareConsumer } from "@nestjs/common";
 import { ReqIdMiddleware } from "./common/middleware/reqid.middleware";
@@ -21,6 +23,8 @@ import { ReqIdMiddleware } from "./common/middleware/reqid.middleware";
     DbModule,
     AuthModule,
     UserModule,
+    PostModule,
+    CategoryModule,
     LoggerModule,
   ],
   providers: [
@@ -50,6 +54,5 @@ apply(...) —— 声明要挂载的中间件（可传多个，如 apply(A, B)�
 
 forRoutes("*") —— 通配符，表示应用到所有路由（等价于 forRoutes({ path: "*", method: RequestMethod.ALL })）
  */
-
 
 

@@ -19,6 +19,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new BusinessException(BizCode.INVALID_CREDENTIALS);
     }
-    return user; // 返回值挂载到 req.user 
+    return user; // 返回值挂载到 req.user **  
   }
 }

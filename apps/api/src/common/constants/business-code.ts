@@ -24,6 +24,18 @@ export const BizCode = {
   INVALID_CREDENTIALS: { code: HttpStatus.UNAUTHORIZED, message: "用户名或密码错误" },
   TOKEN_INVALID: { code: HttpStatus.UNAUTHORIZED, message: "refreshToken 无效或已过期" },
   TOKEN_REVOKED: { code: HttpStatus.UNAUTHORIZED, message: "token 已失效，请重新登录" },
+
+  // 文章模块
+  POST_NOT_FOUND: { code: HttpStatus.NOT_FOUND, message: "文章不存在" },
+  POST_SLUG_EXISTS: { code: HttpStatus.CONFLICT, message: "文章 slug 已存在" },
+  POST_ALREADY_DELETED: { code: HttpStatus.BAD_REQUEST, message: "文章已在回收站中" },
+  POST_NOT_DELETED: { code: HttpStatus.BAD_REQUEST, message: "文章不在回收站中" },
+
+  // 分类模块
+  CATEGORY_NOT_FOUND: { code: HttpStatus.NOT_FOUND, message: "分类不存在" },
+  CATEGORY_NAME_EXISTS: { code: HttpStatus.CONFLICT, message: "分类名称已存在" },
+  CATEGORY_SLUG_EXISTS: { code: HttpStatus.CONFLICT, message: "分类 slug 已存在" },
+  CATEGORY_ALREADY_DELETED: { code: HttpStatus.BAD_REQUEST, message: "分类已删除" },
 } as const;
 
 export type BizCodeValue = (typeof BizCode)[keyof typeof BizCode];
