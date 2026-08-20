@@ -1,6 +1,8 @@
 import { Strategy } from "passport-local";
 import { PassportStrategy } from "@nestjs/passport";
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { BusinessException } from "../../../common/exceptions/business.exception";
+import { BizCode } from "../../../common/constants/business-code";
 import { AuthService } from "../auth.service";
 
 @Injectable()
@@ -15,7 +17,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   async validate(username: string, password: string) {
     const user = await this.authService.validateUser(username, password);
     if (!user) {
-      throw new UnauthorizedException("用户名或密码错误");
+      throw new BusinessException(BizCode.INVALID_CREDENTIALS);
     }
     return user; // 返回值挂载到 req.user 
   }

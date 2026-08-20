@@ -1,165 +1,346 @@
 openapi: 3.0.3
 info:
-  title: Admin 用户模块接口
+  title: PolisBlog - 用户管理模块
+  description: 用户(users)后台管理接口，仅管理员可访问；个人博客默认单管理员账号
   version: 1.0.0
-  description: NestJS + Drizzle 用户管理模块（admin 路由组）
 servers:
-  - url: http://127.0.0.1:3000
-paths:
-
-  /admin:
-    get:
-      summary: 用户分页列表查询
-      tags:
-        - Admin用户管理
-      parameters:
-        - name: page
-          in: query
-          description: 页码，默认1
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: pageSize
-          in: query
-          description: 每页条数，1‑100，默认10
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 10
-        - name: username
-          in: query
-          description: 用户名模糊检索（可选）
-          schema:
-            type: string
-        - name: email
-          in: query
-          description: 邮箱模糊检索（可选）
-          schema:
-            type: string
-      responses:
-        '200':
-          description: 分页结果
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserPageResp'
-
+  - url: /api
+    description: 单体部署base path
+  - url: /api/v1
+    description: 后端拆分预留base path
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
   schemas:
-    CreateUserDto:
+    User:
       type: object
-      required:
-        - username
-        - password
-      properties:
-        username:
-          type: string
-          minLength: 1
-          maxLength: 50
-          description: 用户名
-          example: "zhangsan"
-        password:
-          type: string
-          minLength: 6
-          maxLength: 100
-          description: 明文密码，后端bcrypt加密存储
-          example: "123456"
-        email:
-          type: string
-          format: email
-          maxLength: 100
-          description: 邮箱（可选）
-          example: "zhangsan@example.com"
-        avatar:
-          type: string
-          description: 头像地址（可选）
-          example: ""
-        bio:
-          type: string
-          description: 个人简介（可选）
-          example: ""
-
-    UpdateUserDto:
-      type: object
-      description: 更新用户，全部字段可选；password传则修改密码
-      properties:
-        username:
-          type: string
-          minLength: 1
-          maxLength: 50
-          example: "zhangsan_update"
-        password:
-          type: string
-          minLength: 6
-          maxLength: 100
-          description: 明文密码，不传则不修改密码
-          example: ""
-        email:
-          type: string
-          format: email
-          maxLength: 100
-          example: "update@example.com"
-        avatar:
-          type: string
-          example: ""
-        bio:
-          type: string
-          example: ""
-        role:
-          type: integer
-          description: 用户角色枚举值
-          example: 0
-        status:
-          type: string
-          description: 用户状态，如 inactive
-          example: "inactive"
-
-    SafeUser:
-      type: object
-      description: 用户返回模型，已剔除 passwordHash / refreshToken
+      description: 用户表 users 实体
       properties:
         id:
           type: string
           format: uuid
+          description: 用户唯一UUID
+          example: "550e8400-e29b-41d4-a716-446655440000"
         username:
           type: string
+          maxLength: 50
+          description: 登录用户名，唯一
+          example: "admin"
+        passwordHash:
+          type: string
+          maxLength: 255
+          description: bcrypt密码哈希，接口返回**永远不返回此字段**
+          writeOnly: true
         email:
           type: string
+          maxLength: 100
+          nullable: true
+          description: 用户登录/通知邮箱
+          example: "admin@example.com"
         avatar:
           type: string
+          maxLength: 500
+          nullable: true
+          description: 用户后台头像URL
+          example: "shturl.cc/ur89RD8meka4iYx8"
         bio:
           type: string
+          format: text
+          nullable: true
+          description: 用户后台个人简介
+          example: "全栈开发者"
         role:
-          type: integer
+          type: string
+          enum: [admin, editor]
+          default: admin
+          description: 角色 admin=超级管理员，editor=普通编辑
+          example: "admin"
         status:
           type: string
+          enum: [active, disabled]
+          default: active
+          description: 账号状态 active正常，disabled禁用
+          example: "active"
         lastLoginAt:
           type: string
           format: date-time
+          nullable: true
+          description: 最后登录时间
+          example: "2026-08-19T02:10:30Z"
         createdAt:
           type: string
           format: date-time
+          description: 创建时间
+          example: "2026-01-01T00:00:00Z"
         updatedAt:
           type: string
           format: date-time
+          description: 更新时间
+          example: "2026-08-19T02:10:30Z"
+      required:
+        - id
+        - username
+        - role
+        - status
+        - createdAt
+        - updatedAt
 
-    UserPageResp:
+    UserCreateDTO:
       type: object
-      description: 用户分页返回体
+      description: 创建用户请求体
       properties:
-        list:
+        username:
+          type: string
+          maxLength: 50
+          description: 登录用户名
+          example: "editor01"
+        passwordHash:
+          type: string
+          maxLength: 255
+          description: bcrypt哈希后的密码
+          example: "$2b$10$xxxxxx"
+        email:
+          type: string
+          maxLength: 100
+          nullable: true
+        avatar:
+          type: string
+          maxLength: 500
+          nullable: true
+        bio:
+          type: string
+          format: text
+          nullable: true
+        role:
+          type: string
+          enum: [admin, editor]
+          default: editor
+      required:
+        - username
+        - passwordHash
+
+    UserUpdateDTO:
+      type: object
+      description: 更新用户基础信息（不包含密码）
+      properties:
+        email:
+          type: string
+          maxLength: 100
+          nullable: true
+        avatar:
+          type: string
+          maxLength: 500
+          nullable: true
+        bio:
+          type: string
+          format: text
+          nullable: true
+        role:
+          type: string
+          enum: [admin, editor]
+        status:
+          type: string
+          enum: [active, disabled]
+
+    UserChangePasswordDTO:
+      type: object
+      description: 修改用户密码
+      properties:
+        oldPasswordHash:
+          type: string
+          description: 旧密码哈希
+        newPasswordHash:
+          type: string
+          description: 新密码bcrypt哈希
+      required:
+        - oldPasswordHash
+        - newPasswordHash
+
+    ApiResponseUser:
+      type: object
+      description: 单条用户成功返回
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/User"
+
+    ApiResponseUserList:
+      type: object
+      description: 用户分页列表返回
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
           type: array
           items:
-            $ref: '#/components/schemas/SafeUser'
+            $ref: "#/components/schemas/User"
         total:
           type: integer
-          description: 总条数
-          example: 0
+          example: 1
         page:
           type: integer
           example: 1
         pageSize:
           type: integer
-          example: 10
+          example: 20
+
+    ApiError:
+      type: object
+      description: 统一错误返回
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "权限不足 / 用户不存在"
+        errors:
+          type: array
+          items:
+            type: string
+          example: ["用户名已存在"]
+
+security:
+  - cookieAuth: []
+paths:
+  /admin/users:
+    get:
+      summary: 获取用户分页列表
+      description: 【Auth:Admin】后台查询所有用户；个人博客一般只有1条admin记录
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          description: 筛选账号状态 active / disabled
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUserList"
+        "401":
+          description: 未登录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    post:
+      summary: 创建新用户
+      description: 【Auth:Admin】新增账号；V1.1版本后台页面隐藏注册入口，仅初始化脚本调用
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateDTO"
+      responses:
+        "200":
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+        "400":
+          description: 参数错误/用户名重复
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: 未登录
+
+  /admin/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: 用户UUID
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: 获取单个用户详情
+      description: 【Auth:Admin】根据id查询用户信息，**不会返回passwordHash**
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+        "404":
+          description: 用户不存在
+
+    put:
+      summary: 更新用户基础信息
+      description: 【Auth:Admin】更新邮箱、头像、简介、角色、状态；**不处理密码**
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateDTO"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+
+  /admin/users/{id}/password:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      summary: 修改用户密码
+      description: 【Auth:Admin】修改密码，传入新旧密码哈希
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserChangePasswordDTO"
+      responses:
+        "200":
+          description: 密码修改成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+
+  /admin/users/me:
+    get:
+      summary: 获取当前登录管理员个人信息
+      description: 【Auth:Admin】获取当前会话登录的用户信息，前端后台右上角头像使用
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUser"
+        "401":
+          description: 未登录

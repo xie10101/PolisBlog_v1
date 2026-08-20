@@ -1,4 +1,6 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { BusinessException } from "../../common/exceptions/business.exception";
+import { BizCode } from "../../common/constants/business-code";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
@@ -56,7 +58,7 @@ export class AuthService {
         secret: this.configService.get("JWT_REFRESH_SECRET"),
       });
     } catch (e) {
-      throw new UnauthorizedException("refreshToken无效或已过期");
+      throw new BusinessException(BizCode.TOKEN_INVALID);
     }
 
     const userId = payload.sub as string;
@@ -64,7 +66,7 @@ export class AuthService {
     const [user] = await this.db.select().from(users).where(eq(users.id, userId));
 
     if (!user || user.refreshToken !== refreshToken) {
-      throw new UnauthorizedException("token已失效，请重新登录");
+      throw new BusinessException(BizCode.TOKEN_REVOKED);
     }
 
     // 颁发新accessToken，refreshToken可以复用，也可以轮换重发

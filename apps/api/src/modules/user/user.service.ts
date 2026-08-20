@@ -1,4 +1,6 @@
-import { Injectable, ConflictException, NotFoundException, Inject } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { BusinessException } from "../../common/exceptions/business.exception";
+import { BizCode } from "../../common/constants/business-code";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { eq, ilike, and, count } from "drizzle-orm";
 import * as bcrypt from "bcrypt";
@@ -37,14 +39,14 @@ export class UserService {
       .select({ id: users.id })
       .from(users)
       .where(eq(users.username, dto.username));
-    if (exist) throw new ConflictException("用户名已存在");
+    if (exist) throw new BusinessException(BizCode.USERNAME_EXISTS);
 
     if (dto.email) {
       const [emailExist] = await this.db
         .select({ id: users.id })
         .from(users)
         .where(eq(users.email, dto.email));
-      if (emailExist) throw new ConflictException("邮箱已被注册");
+      if (emailExist) throw new BusinessException(BizCode.EMAIL_EXISTS);
     }
     // 密码加密存储
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -89,14 +91,14 @@ export class UserService {
   /** 按 id 查询单个用户 */
   async findOne(id: string) {
     const [user] = await this.db.select(this.safeColumns).from(users).where(eq(users.id, id));
-    if (!user) throw new NotFoundException("用户不存在");
+    if (!user) throw new BusinessException(BizCode.USER_NOT_FOUND);
     return user;
   }
 
   /** 更新：字段可选；password 若传入则 bcrypt 后更新 */
   async update(id: string, dto: UpdateUserDto) {
     const [exist] = await this.db.select({ id: users.id }).from(users).where(eq(users.id, id));
-    if (!exist) throw new NotFoundException("用户不存在");
+    if (!exist) throw new BusinessException(BizCode.USER_NOT_FOUND);
 
     const passwordHash = dto.password ? await bcrypt.hash(dto.password, 10) : undefined;
 
@@ -119,7 +121,7 @@ export class UserService {
   /** 软删除：status 置为 inactive */
   async remove(id: string) {
     const [exist] = await this.db.select({ id: users.id }).from(users).where(eq(users.id, id));
-    if (!exist) throw new NotFoundException("用户不存在");
+    if (!exist) throw new BusinessException(BizCode.USER_NOT_FOUND);
 
     await this.db.update(users).set({ status: "inactive" }).where(eq(users.id, id));
     return { message: "删除成功" };

@@ -5,7 +5,9 @@ import { users } from "../../../db/schema/user.schema";
 import { eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "../../../db/schema";
-import { Injectable, Inject, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
+import { BusinessException } from "../../../common/exceptions/business.exception";
+import { BizCode } from "../../../common/constants/business-code";
 import { DRIZZLE_DB } from "../../../db/drizzle.provider";
 
 @Injectable()
@@ -31,7 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
       .from(users)
       .where(eq(users.id, payload.sub));
 
-    if (!user) throw new UnauthorizedException("用户不存在");
+    if (!user) throw new BusinessException(BizCode.USER_NOT_FOUND);
     return user; // 挂载 req.user = {id,username,role}
   }
 }

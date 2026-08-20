@@ -14,7 +14,6 @@ const rawCreateSchema = createInsertSchema(posts, {
   content: z.string().min(1, "内容不能为空"),
   excerpt: z.string().max(500, "摘要最多500字符").optional(),
   coverImage: z.string().max(500, "封面图URL最多500字符").optional(),
-  authorId: z.string().uuid("作者ID必须是有效的UUID"),
   categoryId: z.string().uuid("分类ID必须是有效的UUID").optional(),
 });
 
@@ -28,6 +27,7 @@ export const CreatePostSchema = rawCreateSchema.omit({
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
+  authorId: true,
 });
 
 export class CreatePostDto extends createZodDto(CreatePostSchema) {}

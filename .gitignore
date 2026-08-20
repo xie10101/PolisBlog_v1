@@ -29,5 +29,14 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 
+# ai对话历史 
 .cc-history
+
+
+# 日志文件
+
+/apps/api/logs
+
+/apps/api/api
+
 
