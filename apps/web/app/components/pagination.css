@@ -1,0 +1,23 @@
+/*  分页器相关的样式设置  */
+
+.pagination-item{
+    display: inline-block;
+    text-align: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    margin-top: -1px;
+    border-top-width: 1px;
+    border-top-color: transparent;
+    transition: all 0.2s ease-in-out;
+}
+.pagination-item:hover{
+
+    border-top-color: black;
+    border-top-style: solid;
+}
+
+.pagination-item-active{
+ background-color: rgba(172, 171, 171, 0.2);
+ cursor: default;
+}

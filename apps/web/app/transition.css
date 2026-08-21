@@ -1,0 +1,20 @@
+.sidebar{
+  position: absolute;
+  left:-250px;
+  transition: left 0.5s;
+  height: 100vh;
+ }
+
+.body{
+  box-sizing: border-box;
+  transition: padding-left 0.5s;
+} 
+
+
+.transition1{
+ padding-left: 250px;
+}
+
+.transition2{
+  left : 0px;
+}

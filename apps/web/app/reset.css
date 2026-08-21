@@ -1,0 +1,124 @@
+/*  生成的一份基本md转换后的html样式 */
+body {
+  font-family: 'Microsoft YaHei', '微软雅黑', '宋体', 'Arial', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #fff;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+h1 {
+  font-size: 26px;
+}
+h2 {
+  font-size: 22px;
+}
+h3 {
+  font-size: 18px;
+}
+h4 {
+  font-size: 16px;
+}
+h5 {
+  font-size: 14px;
+}
+h6 {
+  font-size: 12px;
+}
+
+p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+ul,
+ol {
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+ul li {
+  list-style: disc;
+}
+ol li {
+  list-style: decimal;
+}
+li {
+  margin-bottom: 5px;
+}
+
+dl {
+  margin-bottom: 20px;
+}
+dd {
+  margin-left: 20px;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0.5rem;
+  border: 1px solid #ccc;
+  /*  合并分割线 */
+  border-collapse: collapse;
+}
+table thead th {
+  background-color: #f5f5f5;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+}
+blockquote {
+  padding: 10px 20px;
+  margin: 0 0 20px;
+  border-left: 5px solid #eee;
+}
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #ccc;
+}
+pre {
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.42857143;
+  color: #333;
+  word-break: break-all;
+  word-wrap: break-word;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+article a {
+  color: #3694fa;
+  text-decoration: none;
+  background-color: transparent;
+}
+article a:hover {
+  color: #23527c;
+  text-decoration: underline;
+}
+
+/*  段落中文字的高亮  */
+p code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}

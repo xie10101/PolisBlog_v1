@@ -1,0 +1,10 @@
+.test
+{
+            width: 96%; /* 设置 p 标签宽度 */
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3; /* 设置显示的行数 */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 2 ; /* 设置行间距 */
+}
